@@ -3,6 +3,7 @@ This module contains an example of a requests based test for the example app.
 Feel free to modify this file in any way.
 """
 import requests
+import json
 
 from auth import get_test_access_tokens
 
@@ -30,9 +31,23 @@ def example_test():
 
         r = requests.get(path, headers=headers)
         message = r.json()["message"]
+        print(message)
         assert("Hello {}".format(username) in message)
         assert("0 projects" in message)
 
+def project_test():
+    path = BASE_URL + "/projects"
+
+    for access_token, username in [(ACCESS_TOKEN_1, USERNAME_1),
+                                   (ACCESS_TOKEN_2, USERNAME_2)]:
+        headers = {"Accept": "application/json",
+                   "Content-Type": "application/json",
+                   "Authorization": "Bearer " + access_token}
+
+        r = requests.post(path, headers=headers,  data = json.dumps({"project_name": 'My Test Project'}))
+        message = r.json()["message"]
+        print(message)
 
 if __name__ == "__main__":
     example_test()
+    project_test()

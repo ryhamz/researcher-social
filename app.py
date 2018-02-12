@@ -37,5 +37,26 @@ def example():
                         mimetype='application/json')
 
 
+def project_post(r):
+    response_dict = {
+            "message": "Post Projects"
+    }
+    print(json.loads(r.data)['project_name'])
+    return Response(json.dumps(response_dict), status=200,
+                        mimetype='application/json')
+
+def project_get(r):
+    response_dict = {
+            "message": "Get Projects"
+    }
+    return Response(json.dumps(response_dict), status=405,
+                        mimetype='application/json')
+@app.route("/projects", methods=["GET", "POST"])
+def projects():
+    handler_table = {
+                    "POST": project_post,
+                     "GET": project_get}
+    return handler_table[request.method](request)
+
 if __name__ == "__main__":
     app.run()
