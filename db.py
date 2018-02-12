@@ -6,7 +6,7 @@ import sqlite3
 
 # on import create or connect to an existing db
 # and turn on foreign key constraints
-conn = sqlite3.connect("globus_challenge.db")
+conn = sqlite3.connect("globus_challenge.db" , check_same_thread=False)
 c = conn.cursor()
 c.execute("PRAGMA foreign_keys = ON;")
 conn.commit()
