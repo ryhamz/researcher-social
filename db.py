@@ -34,3 +34,17 @@ def get_num_projects():
     """
     c.execute("SELECT COUNT(project_id) FROM projects")
     return c.fetchone()[0]
+
+def add_project(project_id):
+    """
+    Inserts a new project entry
+    """
+    c.execute(''' INSERT INTO projects(project_id)
+        VALUES(?) ''', (project_id,))
+def delete_project(project_id):
+    """
+    Deletes the given project entry
+    """
+    c.execute(''' DELETE FROM projects
+        WHERE project_id = ? ''', (project_id,))
+print(get_num_projects())
