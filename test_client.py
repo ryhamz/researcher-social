@@ -45,8 +45,9 @@ def project_test():
                    "Authorization": "Bearer " + access_token}
 
         r = requests.post(path, headers=headers,  data = json.dumps({"project_name": 'My Test Project'}))
-        message = r.json()["message"]
-        print(message)
+        data = r.json()
+        for k in data:
+            print k, data[k]
 
 if __name__ == "__main__":
     example_test()

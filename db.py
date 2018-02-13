@@ -47,4 +47,3 @@ def delete_project(project_id):
     """
     c.execute(''' DELETE FROM projects
         WHERE project_id = ? ''', (project_id,))
-print(get_num_projects())
