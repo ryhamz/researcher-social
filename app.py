@@ -6,7 +6,7 @@ import json
 import uuid
 from flask import Flask, request, Response
 
-from db import initialize_db, get_num_projects
+from db import initialize_db, get_num_projects, add_project
 from auth import get_user_info
 
 app = Flask(__name__)
@@ -60,6 +60,9 @@ def project_post(r):
     data = json.loads(r.data)
     # Make a unique identifier for the new project
     project_id = str(uuid.uuid1())
+
+    # Actually add the project to the database
+    add_project(project_id, user_id)
 
     response_dict = {
             "message": "Post Projects",

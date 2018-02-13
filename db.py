@@ -20,7 +20,8 @@ def initialize_db():
     try:
         c.execute("""
             CREATE TABLE projects (
-                project_id TEXT PRIMARY KEY
+                project_id TEXT PRIMARY KEY,
+                owner_id TEXT
             );
             """)
         conn.commit()
@@ -35,15 +36,24 @@ def get_num_projects():
     c.execute("SELECT COUNT(project_id) FROM projects")
     return c.fetchone()[0]
 
-def add_project(project_id):
+def add_project(project_id, owner_id):
     """
     Inserts a new project entry
     """
-    c.execute(''' INSERT INTO projects(project_id)
-        VALUES(?) ''', (project_id,))
+    c.execute(''' INSERT INTO projects(project_id, owner_id)
+        VALUES(?, ?) ''', (project_id, owner_id))
+    conn.commit()
 def delete_project(project_id):
     """
     Deletes the given project entry
     """
     c.execute(''' DELETE FROM projects
         WHERE project_id = ? ''', (project_id,))
+    conn.commit()
+
+def delete_all_projects():
+    """
+    Testing function, used to clean db
+    """
+    c.execute('DELETE FROM projects')
+    conn.commit()

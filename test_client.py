@@ -6,6 +6,7 @@ import requests
 import json
 
 from auth import get_test_access_tokens
+from db import delete_project
 
 # testing constants and tokens
 # tokens_1 and 2 are for challengeuser1 and challenguser2 respectively
@@ -48,6 +49,8 @@ def project_test():
         data = r.json()
         for k in data:
             print k, data[k]
+        delete_project(data['project_id'])
+
 
 if __name__ == "__main__":
     example_test()
