@@ -6,7 +6,7 @@ import requests
 import json
 
 from auth import get_test_access_tokens
-from db import delete_project
+from db import delete_project, add_project
 
 # testing constants and tokens
 # tokens_1 and 2 are for challengeuser1 and challenguser2 respectively
@@ -36,7 +36,7 @@ def example_test():
         assert("Hello {}".format(username) in message)
         assert("0 projects" in message)
 
-def project_test():
+def post_project_test():
     path = BASE_URL + "/projects"
 
     for access_token, username in [(ACCESS_TOKEN_1, USERNAME_1),
@@ -52,6 +52,23 @@ def project_test():
         delete_project(data['project_id'])
 
 
+def get_project_test():
+    add_project("111", "Test Project", "challengeuser1@globusid.org", "8bde3e84-a964-479c-9c7b-4d7991717a1b")
+    path = BASE_URL + "/projects/111"
+
+    for access_token, username in [(ACCESS_TOKEN_1, USERNAME_1),
+                                   (ACCESS_TOKEN_2, USERNAME_2)]:
+        headers = {"Accept": "application/json",
+                   "Content-Type": "application/json",
+                   "Authorization": "Bearer " + access_token}
+
+        r = requests.get(path, headers=headers)
+        data = r.json()
+        for k in data:
+            print k, data[k]
+    delete_project("111")
+
 if __name__ == "__main__":
     example_test()
-    project_test()
+    post_project_test()
+    get_project_test()

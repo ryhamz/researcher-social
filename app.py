@@ -7,6 +7,7 @@ import uuid
 from flask import Flask, request, Response
 
 from db import initialize_db, get_num_projects, add_project
+from db import get_project_by_id
 from auth import get_user_info
 
 app = Flask(__name__)
@@ -60,16 +61,17 @@ def project_post(r):
     data = json.loads(r.data)
     # Make a unique identifier for the new project
     project_id = str(uuid.uuid1())
+    project_name = data['project_name']
 
     # Actually add the project to the database
-    add_project(project_id, user_id)
+    add_project(project_id, project_name, username, user_id)
 
     response_dict = {
             "message": "Post Projects",
             "project_id": project_id,
             "owner_id": user_id,
             "owner_username": username,
-            "project_name": data['project_name'],
+            "project_name": project_name,
             "comments": []
     }
     return Response(json.dumps(response_dict), status=200,
@@ -84,12 +86,58 @@ def project_get(r):
                     mimetype='application/json')
 
 
+def retrieve_project(r, project_id):
+    project = get_project_by_id(project_id)
+    # get bearer token from auth header
+    auth_header = request.headers.get("authorization")
+    access_token = auth_header[len("Bearer "):]
+
+    # get username and user id to respond with
+    user_info = get_user_info(access_token)
+    username = user_info["username"]
+    user_id = user_info["user_id"]
+
+    response_dict = {
+            "message": "Get project",
+            "project_id": project_id,
+            "owner_id": project['owner_id'],
+            "owner_username": project['owner_username'],
+            "project_name": project['project_name'],
+            "comments": []
+    }
+    return Response(json.dumps(response_dict), status=200,
+                    mimetype='application/json')
+
+
+def delete_project(r, project_id):
+    pass
+
+
+def create_comment(r, project_id):
+    pass
+
+
 @app.route("/projects", methods=["GET", "POST"])
 def projects():
     handler_table = {
                     "POST": project_post,
                     "GET": project_get}
     return handler_table[request.method](request)
+
+
+@app.route("/projects/<project_id>", methods=["GET", "DELETE"])
+def project(project_id):
+    handler_table = {
+                    "DELETE": delete_project,
+                    "GET": retrieve_project}
+    return handler_table[request.method](request, project_id)
+
+
+@app.route("/projects/<project_id>/comments", methods=["POST"])
+def comment(project_id):
+    handler_table = {
+                    "POST": create_comment}
+    return handler_table[request.method](request, project_id)
 
 
 if __name__ == "__main__":
