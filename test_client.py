@@ -6,7 +6,7 @@ import requests
 import json
 
 from auth import get_test_access_tokens
-from db import delete_project, add_project
+from db import delete_project, add_project, get_comments_for_project
 
 # testing constants and tokens
 # tokens_1 and 2 are for challengeuser1 and challenguser2 respectively
@@ -68,7 +68,26 @@ def get_project_test():
             print k, data[k]
     delete_project("111")
 
+def make_comment_test():
+    add_project("111", "Test Project", "challengeuser1@globusid.org", "8bde3e84-a964-479c-9c7b-4d7991717a1b")
+    path = BASE_URL + "/projects/111/comments"
+
+    for access_token, username in [(ACCESS_TOKEN_1, USERNAME_1),
+                                   (ACCESS_TOKEN_2, USERNAME_2)]:
+        headers = {"Accept": "application/json",
+                   "Content-Type": "application/json",
+                   "Authorization": "Bearer " + access_token}
+
+        r = requests.post(path, headers=headers, data=json.dumps({"message": 'Comments are great ' + username}))
+        data = r.json()
+        for k in data:
+            print k, data[k]
+    print("here are the comments:")
+    print(get_comments_for_project("111"))
+    delete_project("111")
+
 if __name__ == "__main__":
     example_test()
     post_project_test()
     get_project_test()
+    make_comment_test()

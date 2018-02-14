@@ -32,7 +32,7 @@ def initialize_db():
     except sqlite3.OperationalError:
         print "initialization error"
     c.execute("""
-            CREATE TABLE comments (
+            CREATE TABLE IF NOT EXISTS comments (
                 comment_id TEXT PRIMARY KEY,
                 commenter_id TEXT,
                 commenter_username TEXT,
@@ -61,13 +61,6 @@ def get_comments_for_project(project_id):
                  WHERE p_id = ?''', (project_id,))
     return c.fetchall()
 
-def delete_comments_for_project(project_id):
-    """
-    Deletes all comments for the given project_id
-    """
-    c.execute('''DELETE FROM comments
-                 WHERE p_id = ?''', (project_id,))
-    conn.commit()
 
 
 def add_comment(comment_id, commenter_id, commenter_username, message, project_id):
@@ -97,10 +90,21 @@ def add_project(project_id, project_name, owner_username, owner_id):
     conn.commit()
 
 
+def delete_comments_for_project(project_id):
+    """
+    Deletes all comments for the given project_id
+    """
+    c.execute('''DELETE FROM comments
+                 WHERE p_id = ?''', (project_id,))
+    conn.commit()
+
+
 def delete_project(project_id):
     """
     Deletes the given project entry
+    and all associated comments
     """
+    delete_comments_for_project(project_id)
     c.execute(''' DELETE FROM projects
         WHERE project_id = ? ''', (project_id,))
     conn.commit()
@@ -116,6 +120,7 @@ def delete_owners_project(project_id, owner_id):
     conn.commit()
     if rowcount == 0:
         return False
+    delete_comments_for_project(project_id)
     return True
 
 
@@ -125,5 +130,6 @@ def delete_all_projects():
     """
     c.execute('DELETE FROM projects')
     conn.commit()
+
 
 

@@ -7,7 +7,7 @@ import uuid
 from flask import Flask, request, Response
 
 from db import initialize_db, get_num_projects, add_project
-from db import get_project_by_id
+from db import get_project_by_id, add_comment
 from auth import get_user_info
 
 app = Flask(__name__)
@@ -114,7 +114,31 @@ def delete_project(r, project_id):
 
 
 def create_comment(r, project_id):
-    pass
+    # get bearer token from auth header
+    auth_header = request.headers.get("authorization")
+    access_token = auth_header[len("Bearer "):]
+
+    # get username and user id to respond with
+    user_info = get_user_info(access_token)
+    username = user_info["username"]
+    user_id = user_info["user_id"]
+
+    data = json.loads(r.data)
+
+    # Create the comment id.
+    comment_id = str(uuid.uuid1())
+
+    # Insert the comment
+    add_comment(comment_id, user_id, username, data['message'], project_id)
+
+    response_dict = {
+            "comment_id": comment_id,
+            "commenter_id": user_id,
+            "commenter_username": username,
+            "message": data['message']
+    }
+    return Response(json.dumps(response_dict), status=200,
+                    mimetype='application/json')
 
 
 @app.route("/projects", methods=["GET", "POST"])
