@@ -7,7 +7,8 @@ import uuid
 from flask import Flask, request, Response
 
 from db import initialize_db, get_num_projects, add_project
-from db import get_project_by_id, add_comment
+from db import get_project_by_id, add_comment, get_comments_for_project
+from db import delete_owners_project
 from auth import get_user_info
 
 app = Flask(__name__)
@@ -92,10 +93,7 @@ def retrieve_project(r, project_id):
     auth_header = request.headers.get("authorization")
     access_token = auth_header[len("Bearer "):]
 
-    # get username and user id to respond with
-    user_info = get_user_info(access_token)
-    username = user_info["username"]
-    user_id = user_info["user_id"]
+    comments = get_comments_for_project(project_id)
 
     response_dict = {
             "message": "Get project",
@@ -103,14 +101,40 @@ def retrieve_project(r, project_id):
             "owner_id": project['owner_id'],
             "owner_username": project['owner_username'],
             "project_name": project['project_name'],
-            "comments": []
+            "comments": [dict(c) for c in comments]
     }
     return Response(json.dumps(response_dict), status=200,
                     mimetype='application/json')
 
 
 def delete_project(r, project_id):
-    pass
+    project = get_project_by_id(project_id)
+    # get bearer token from auth header
+    auth_header = request.headers.get("authorization")
+    access_token = auth_header[len("Bearer "):]
+
+    # get user id to compare against owner id.
+    user_info = get_user_info(access_token)
+    user_id = user_info["user_id"]
+
+    comments = get_comments_for_project(project_id)
+    delete_check = delete_owners_project(project_id, user_id)
+
+    if delete_check:
+        status_code = 200
+        response_dict = {
+                "project_id": project_id,
+                "owner_id": project['owner_id'],
+                "owner_username": project['owner_username'],
+                "project_name": project['project_name'],
+                "comments": [dict(c) for c in comments]
+        }
+    else:
+        status_code = 403
+        response_dict = {"message": "You are not the owner\
+                          of project " + project_id}
+    return Response(json.dumps(response_dict), status=status_code,
+                    mimetype='application/json')
 
 
 def create_comment(r, project_id):

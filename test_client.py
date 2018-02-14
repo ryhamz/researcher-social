@@ -7,6 +7,8 @@ import json
 
 from auth import get_test_access_tokens
 from db import delete_project, add_project, get_comments_for_project
+from db import add_comment
+
 
 # testing constants and tokens
 # tokens_1 and 2 are for challengeuser1 and challenguser2 respectively
@@ -54,6 +56,9 @@ def post_project_test():
 
 def get_project_test():
     add_project("111", "Test Project", "challengeuser1@globusid.org", "8bde3e84-a964-479c-9c7b-4d7991717a1b")
+    add_comment("0", "55555", "fake user", "fake user's message", "111")
+    add_comment("1", "55555", "fake user", "fake user's second message", "111")
+    add_comment("2", "55555", "fake user", "fake user's last message", "111")
     path = BASE_URL + "/projects/111"
 
     for access_token, username in [(ACCESS_TOKEN_1, USERNAME_1),
@@ -86,8 +91,25 @@ def make_comment_test():
     print(get_comments_for_project("111"))
     delete_project("111")
 
+def delete_project_test():
+    add_project("111", "Test Project", "challengeuser1@globusid.org", "8bde3e84-a964-479c-9c7b-4d7991717a1b")
+    add_comment("0", "55555", "fake user", "fake user's message", "111")
+    add_comment("1", "55555", "fake user", "fake user's second message", "111")
+    add_comment("2", "55555", "fake user", "fake user's last message", "111")
+    path = BASE_URL + "/projects/111"
+
+    headers = {"Accept": "application/json",
+               "Content-Type": "application/json",
+               "Authorization": "Bearer " + ACCESS_TOKEN_1}
+
+    r = requests.delete(path, headers=headers)
+    data = r.json()
+    for k in data:
+        print k, data[k]
+
 if __name__ == "__main__":
     example_test()
     post_project_test()
     get_project_test()
     make_comment_test()
+    delete_project_test()

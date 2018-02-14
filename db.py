@@ -6,7 +6,7 @@ import sqlite3
 
 # on import create or connect to an existing db
 # and turn on foreign key constraints
-conn = sqlite3.connect("globus_challenge.db" , check_same_thread=False)
+conn = sqlite3.connect("globus_challenge.db", check_same_thread=False)
 conn.row_factory = sqlite3.Row
 c = conn.cursor()
 c.execute("PRAGMA foreign_keys = ON;")
@@ -30,15 +30,14 @@ def initialize_db():
 
         conn.commit()
     except sqlite3.OperationalError:
-        print "initialization error"
+        print("initialization error")
     c.execute("""
             CREATE TABLE IF NOT EXISTS comments (
                 comment_id TEXT PRIMARY KEY,
                 commenter_id TEXT,
                 commenter_username TEXT,
                 message TEXT,
-                p_id TEXT,
-                FOREIGN KEY(p_id) REFERENCES projects(project_id)
+                p_id TEXT
             );
             """)
     conn.commit()
@@ -60,7 +59,6 @@ def get_comments_for_project(project_id):
                  commenter_username, message FROM comments
                  WHERE p_id = ?''', (project_id,))
     return c.fetchall()
-
 
 
 def add_comment(comment_id, commenter_id, commenter_username, message, project_id):
@@ -109,6 +107,7 @@ def delete_project(project_id):
         WHERE project_id = ? ''', (project_id,))
     conn.commit()
 
+
 def delete_owners_project(project_id, owner_id):
     """
     Deletes the given project entry, but check that the owner
@@ -118,7 +117,7 @@ def delete_owners_project(project_id, owner_id):
         WHERE project_id = ? and owner_id = ?''', (project_id, owner_id))
     result = c.rowcount
     conn.commit()
-    if rowcount == 0:
+    if result == 0:
         return False
     delete_comments_for_project(project_id)
     return True
@@ -130,6 +129,3 @@ def delete_all_projects():
     """
     c.execute('DELETE FROM projects')
     conn.commit()
-
-
-

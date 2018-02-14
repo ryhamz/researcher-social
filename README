@@ -19,15 +19,3 @@ TODO:
 
 1. Testing for post project.
 
-2. Delete project
-    -access control
-    -have the db function for deleting projects
-    -have the db funciton for removing all of a project's comments
-
-
-3. Create comment
-    -route and response written
-    -basic test running
-
-4. Finish get project by adding the comments in
-    -have the db function
