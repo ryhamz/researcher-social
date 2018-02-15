@@ -39,6 +39,9 @@ def example_test():
         assert("0 projects" in message)
 
 def post_project_test():
+    """
+    Tests users 1 and 2 adding a project
+    """
     path = BASE_URL + "/projects"
 
     for access_token, username in [(ACCESS_TOKEN_1, USERNAME_1),
@@ -54,7 +57,49 @@ def post_project_test():
         delete_project(data['project_id'])
 
 
+def project_methods_not_allowed():
+    """
+    Uses all unallowed methods on the /projects endpoint.
+    """
+    results = []
+    r = requests.get(BASE_URL + '/projects')
+    results.append(r.status_code)
+    r = requests.put(BASE_URL + '/projects')
+    results.append(r.status_code)
+    r = requests.delete(BASE_URL + '/projects')
+    results.append(r.status_code)
+    for code in results:
+        assert(code == 405)
+
+
+def project_bad_request():
+    """
+    Sumbits request to /projects without a project name.
+    """
+    path = BASE_URL + "/projects"
+    headers = {"Accept": "application/json",
+               "Content-Type": "application/json",
+               "Authorization": "Bearer " + ACCESS_TOKEN_1}
+
+    r = requests.post(path, headers=headers,  data = json.dumps({"name": 'My Test Project'}))
+    assert(r.status_code == 400)
+
+def project_no_auth():
+    """
+    Submits a request to /projects without a valid bearer.
+    """
+    path = BASE_URL + "/projects"
+    headers = {"Accept": "application/json",
+               "Content-Type": "application/json",
+               "Authorization": "Bearer " + "zzz"}
+
+    r = requests.post(path, headers=headers,  data = json.dumps({"name": 'My Test Project'}))
+    assert(r.status_code == 403)
+
 def get_project_test():
+    """
+    Tests get method on /projects/<id> endpoint.
+    """
     add_project("111", "Test Project", "challengeuser1@globusid.org", "8bde3e84-a964-479c-9c7b-4d7991717a1b")
     add_comment("0", "55555", "fake user", "fake user's message", "111")
     add_comment("1", "55555", "fake user", "fake user's second message", "111")
@@ -74,6 +119,9 @@ def get_project_test():
     delete_project("111")
 
 def make_comment_test():
+    """
+    Tests /project/<id>/comments endpoint, with a valid request.
+    """
     add_project("111", "Test Project", "challengeuser1@globusid.org", "8bde3e84-a964-479c-9c7b-4d7991717a1b")
     path = BASE_URL + "/projects/111/comments"
 
@@ -110,6 +158,9 @@ def delete_project_test():
 if __name__ == "__main__":
     example_test()
     post_project_test()
+    project_methods_not_allowed()
+    project_bad_request()
+    project_no_auth()
     get_project_test()
     make_comment_test()
     delete_project_test()

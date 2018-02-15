@@ -39,6 +39,28 @@ def example():
                         mimetype='application/json')
 
 
+def bad_request():
+    """
+    Returns a response with status code 400.
+    Use for invalid json
+    """
+    response_dict = {
+            "message": "Incorrect JSON provided."
+    }
+    return Response(json.dumps(response_dict), status=400,
+                    mimetype='application/json')
+
+def bad_auth():
+    """
+    Returns a response with status code 403.
+    Use for invalid authentication/
+    """
+    response_dict = {
+            "message": "Userinfo could not be gotten from token."
+    }
+    return Response(json.dumps(response_dict), status=403,
+                    mimetype='application/json')
+
 def project_post(r):
     """
     POST request to projects.
@@ -54,7 +76,11 @@ def project_post(r):
     access_token = auth_header[len("Bearer "):]
 
     # get username and user id to respond with
-    user_info = get_user_info(access_token)
+    try:
+        user_info = get_user_info(access_token)
+    except ValueError:
+        return bad_auth()
+
     username = user_info["username"]
     user_id = user_info["user_id"]
     print("Posting user ID is {}.".format(user_id))
@@ -62,6 +88,8 @@ def project_post(r):
     data = json.loads(r.data)
     # Make a unique identifier for the new project
     project_id = str(uuid.uuid1())
+    if 'project_name' not in data:
+        return bad_request()
     project_name = data['project_name']
 
     # Actually add the project to the database
@@ -76,14 +104,6 @@ def project_post(r):
             "comments": []
     }
     return Response(json.dumps(response_dict), status=200,
-                    mimetype='application/json')
-
-
-def project_get(r):
-    response_dict = {
-            "message": "This method is not supported"
-    }
-    return Response(json.dumps(response_dict), status=405,
                     mimetype='application/json')
 
 
@@ -165,11 +185,10 @@ def create_comment(r, project_id):
                     mimetype='application/json')
 
 
-@app.route("/projects", methods=["GET", "POST"])
+@app.route("/projects", methods=["POST"])
 def projects():
     handler_table = {
-                    "POST": project_post,
-                    "GET": project_get}
+                    "POST": project_post}
     return handler_table[request.method](request)
 
 

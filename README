@@ -8,11 +8,11 @@ File descriptions:
 
 README - short file descriptions and instructions for running the service
 Makefile - simple Makefile to interact with provided example code
-app.py - example code for a Flask application
+app.py - Main Flask application driver
 auth.py - helpers for interacting with the Globus Auth API.
-db.py - example code for a SQLite database
+db.py - SQLite database functions
 requirements.txt - list of python requirements to be installed via pip
-test_client.py - example code for a requests based test client
+test_client.py - Tests for the researcher social network.
 
 
 TODO:
